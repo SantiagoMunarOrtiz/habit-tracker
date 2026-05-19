@@ -189,12 +189,12 @@ export const analyticsService = {
     
     const days = eachDayOfInterval({ start, end });
     const dailyBreakdown = await Promise.all(
-      days.map(d => this.getDailyStats(userId, format(d, 'yyyy-MM-dd'), habitId))
+      days.map((d: Date) => this.getDailyStats(userId, format(d, 'yyyy-MM-dd'), habitId))
     );
 
     let expectedCount = 0;
     let completedCount = 0;
-    dailyBreakdown.forEach(d => {
+    dailyBreakdown.forEach((d: any) => {
       expectedCount += d.expectedCount;
       completedCount += d.completedCount;
     });
@@ -230,12 +230,12 @@ export const analyticsService = {
 
     const days = eachDayOfInterval({ start, end });
     const dailyBreakdown = await Promise.all(
-      days.map(d => this.getDailyStats(userId, format(d, 'yyyy-MM-dd'), habitId))
+      days.map((d: Date) => this.getDailyStats(userId, format(d, 'yyyy-MM-dd'), habitId))
     );
 
     let expectedCount = 0;
     let completedCount = 0;
-    dailyBreakdown.forEach(d => {
+    dailyBreakdown.forEach((d: any) => {
       expectedCount += d.expectedCount;
       completedCount += d.completedCount;
     });

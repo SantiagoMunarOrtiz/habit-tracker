@@ -21,7 +21,14 @@ export function Auth({ onLogin }: any) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-      const data = await res.json();
+      
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error('Server returned an invalid response. Database might not be connected.');
+      }
+      
       if (!res.ok) {
         throw new Error(data.error || 'Authentication failed');
       }
@@ -42,7 +49,14 @@ export function Auth({ onLogin }: any) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
-      const data = await res.json();
+      
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error('Server returned an invalid response. Database might not be connected.');
+      }
+      
       if (!res.ok) {
         throw new Error(data.error || 'Guest login failed');
       }

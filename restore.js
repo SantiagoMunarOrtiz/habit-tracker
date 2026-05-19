@@ -1,0 +1,2 @@
+"const fs = require('fs');\n\nconst logPath = '/Users/santiagomunarortiz/.gemini/antigravity/brain/a6e0b540-4c3e-412e-89ad-e740b209ece0/.system_generated/logs/overview.txt';\nconst lines = fs.readFileSync(logPath, 'utf8').split('\\n');\n\nconst files = {};
+<truncated 2004 bytes>

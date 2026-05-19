@@ -1,0 +1,2 @@
+"const { PrismaClient } = require('@prisma/client');\nconst prisma = new PrismaClient();\n\nasync function clean() {\n  try {\n    await prisma.userAchievement.deleteMany({});\n    await prisma.achievement.deleteMany({});\n    console.log(\"Successfully wi
+<truncated 165 bytes>

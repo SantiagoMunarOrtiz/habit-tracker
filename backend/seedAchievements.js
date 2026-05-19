@@ -1,0 +1,2 @@
+"const { PrismaClient } = require('@prisma/client');\nconst prisma = new PrismaClient();\n\nconst ladder = [\n  {\n    name: 'First Step Celebration',\n    description: 'You completed your first habit. The journey begins.',\n    milestoneCompletions: 1,\n 
+<truncated 2917 bytes>

@@ -10,7 +10,7 @@ export function Sidebar({ user, onLogout }: { user: User, onLogout?: () => void 
 
   const handleCreateVacation = async (data: any) => {
     try {
-      await fetch('http://localhost:3001/api/vacations', {
+      await fetch(`${import.meta.env.VITE_API_URL || '/api'}/vacations`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, L
 import { format } from 'date-fns';
 import type { User } from '../types';
 
-const API_URL = 'http://localhost:3001/api'; 
+const API_URL = import.meta.env.VITE_API_URL || '/api'; 
 
 interface DailyStats {
   date: string;

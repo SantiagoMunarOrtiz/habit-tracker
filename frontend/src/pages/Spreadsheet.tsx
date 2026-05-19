@@ -4,7 +4,7 @@ import { HabitFormModal } from '../components/HabitFormModal';
 import { HabitGrid } from '../components/HabitGrid';
 import type { User, Habit, Vacation } from '../types';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export function Spreadsheet({ user }: { user: User }) {
   const [habits, setHabits] = useState<Habit[]>([]);

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Award, Brain, CheckCircle, Shield, Trophy, UserCheck, Zap, Gift, Footprints, Flame, CalendarCheck, Check, ChevronDown, ChevronRight } from 'lucide-react';
 import type { User, Achievement } from '../types';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 interface HabitGroup {
   habitId: string;

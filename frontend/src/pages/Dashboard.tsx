@@ -3,7 +3,7 @@ import { PlusCircle, Check, Trash2, Palmtree } from 'lucide-react';
 import { HabitFormModal } from '../components/HabitFormModal';
 import type { User, Habit, Vacation } from '../types';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export function Dashboard({ user }: { user: User }) {
   const [habits, setHabits] = useState<Habit[]>([]);

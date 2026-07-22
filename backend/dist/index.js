@@ -16,8 +16,8 @@ const authMiddleware_1 = require("./middleware/authMiddleware");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
-        // Allow any localhost origin (5173, 5174, etc.) for local dev
-        if (!origin || origin.startsWith('http://localhost:')) {
+        // Allow any localhost origin and any vercel app for dev/prod
+        if (!origin || origin.startsWith('http://localhost:') || origin.endsWith('.vercel.app')) {
             callback(null, true);
         }
         else {

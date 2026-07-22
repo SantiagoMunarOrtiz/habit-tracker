@@ -130,39 +130,4 @@ router.get('/me', async (req, res) => {
         res.status(401).json({ error: 'Invalid or expired token' });
     }
 });
-// Guest Login
-router.post('/guest', async (req, res) => {
-    try {
-        const guestEmail = 'guest@habittracker.com';
-        let user = await prisma.user.findUnique({
-            where: { email: guestEmail },
-            include: { categories: true }
-        });
-        if (!user) {
-            const hashedPassword = await bcryptjs_1.default.hash('guestpassword123', 10);
-            user = await prisma.user.create({
-                data: {
-                    email: guestEmail,
-                    password: hashedPassword,
-                    name: 'Guest User',
-                    categories: {
-                        create: [
-                            { name: 'Personal', color: '#10b981' },
-                            { name: 'Work', color: '#3b82f6' },
-                            { name: 'Study', color: '#8b5cf6' }
-                        ]
-                    }
-                },
-                include: { categories: true }
-            });
-        }
-        const token = jsonwebtoken_1.default.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
-        setCookie(res, token);
-        res.json({ user: excludePassword(user), token });
-    }
-    catch (error) {
-        console.error('Guest login error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
 exports.default = router;

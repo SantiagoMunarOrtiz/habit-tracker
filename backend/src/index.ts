@@ -7,6 +7,10 @@ import vacationRoutes from './routes/vacationRoutes';
 import authRoutes from './routes/authRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 import achievementRoutes from './routes/achievementRoutes';
+import goalRoutes from './routes/goalRoutes';
+import reflectionRoutes from './routes/reflectionRoutes';
+import workPlannerRoutes from './routes/workPlannerRoutes';
+import lifeReviewRoutes from './routes/lifeReviewRoutes';
 import { authenticateToken } from './middleware/authMiddleware';
 
 const app = express();
@@ -34,6 +38,10 @@ app.use('/api/habits', authenticateToken, habitRoutes);
 app.use('/api/vacations', authenticateToken, vacationRoutes);
 app.use('/api/analytics', authenticateToken, analyticsRoutes);
 app.use('/api/achievements', authenticateToken, achievementRoutes);
+app.use('/api/goals', authenticateToken, goalRoutes);
+app.use('/api/reflections', authenticateToken, reflectionRoutes);
+app.use('/api/work-planner', authenticateToken, workPlannerRoutes);
+app.use('/api/life-reviews', authenticateToken, lifeReviewRoutes);
 
 const PORT = process.env.PORT || 3001;
 if (process.env.NODE_ENV !== 'production') {

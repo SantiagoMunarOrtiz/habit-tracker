@@ -17,6 +17,7 @@ export interface Habit {
   startDate?: string;
   endDate?: string;
   createdAt?: string;
+  goalId?: string | null;
   logs: { date: string; status: string; note?: string }[];
 }
 
@@ -53,3 +54,85 @@ export interface Achievement {
   achievementId?: string;
   completedAt?: string;
 }
+
+export interface SystemRule {
+  id: string;
+  goalId: string;
+  text: string;
+  completed: boolean;
+  status?: string;
+}
+
+export interface DailyReflection {
+  id: string;
+  date: string;
+  note?: string;
+  focusRating?: number;
+  energyRating?: number;
+  satisfactionRating?: number;
+  q1Progress?: string;
+  q2Learned?: string;
+  q3Blocked?: string;
+  q4NextAction?: string;
+  q5ObstaclePlan?: string;
+  goalId?: string;
+  habitId?: string;
+  goal?: Goal;
+  habit?: Habit;
+  createdAt: string;
+}
+
+export interface WorkTask {
+  id: string;
+  title: string;
+  area: string;
+  status: string;
+  priority: string;
+  deadline?: string;
+  scheduledDate?: string;
+  actualTime: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Goal {
+  id: string;
+  title: string;
+  term: 'short' | 'medium' | 'long';
+  status: string;
+  targetDate?: string;
+  createdAt: string;
+  rules: SystemRule[];
+  habits?: Habit[];
+}
+
+export interface LifeReviewArea {
+  id: string;
+  lifeReviewId: string;
+  areaName: string;
+  rating?: number;
+  responses?: Record<string, string>;
+}
+
+export interface LifeReview {
+  id: string;
+  userId: string;
+  type: 'quarterly' | 'annual';
+  year: number;
+  cycle: number;
+  status: 'draft' | 'completed';
+  overallSatisfaction?: number;
+  responses?: Record<string, string>;
+  mainPriority?: string;
+  threeChanges?: Record<string, string>;
+  nextAction?: string;
+  actionTargetDate?: string;
+  actionStatus: string;
+  notes?: string;
+  questionVersion: number;
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
+  areas: LifeReviewArea[];
+}
+

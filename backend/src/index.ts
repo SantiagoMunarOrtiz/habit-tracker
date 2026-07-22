@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import userRoutes from './routes/userRoutes';
 import habitRoutes from './routes/habitRoutes';
 import vacationRoutes from './routes/vacationRoutes';
@@ -11,11 +12,20 @@ import { authenticateToken } from './middleware/authMiddleware';
 const app = express();
 
 app.use(cors({
-  origin: '*', // Allow all origins for dev
+  origin: (origin, callback) => {
+    // Allow any localhost origin (5173, 5174, etc.) for local dev
+    if (!origin || origin.startsWith('http://localhost:')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
+app.use(cookieParser());
 
 // Routes
 app.use('/api/auth', authRoutes);

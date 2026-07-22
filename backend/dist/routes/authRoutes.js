@@ -4,12 +4,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const client_1 = require("@prisma/client");
 const router = express_1.default.Router();
 const prisma = new client_1.PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-for-local-dev';
+const setCookie = (res, token) => {
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+};
+const excludePassword = (user) => {
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+};
 // Register
 router.post('/register', async (req, res) => {
     try {
@@ -17,16 +29,20 @@ router.post('/register', async (req, res) => {
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
-        const existingUser = await prisma.user.findUnique({ where: { email } });
-        if (existingUser) {
-            return res.status(400).json({ error: 'User already exists' });
+        if (password.length < 8) {
+            return res.status(400).json({ error: 'Password must be at least 8 characters long' });
         }
-        const hashedPassword = await bcrypt_1.default.hash(password, 10);
+        const normalizedEmail = email.toLowerCase().trim();
+        const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email is already registered' });
+        }
+        const hashedPassword = await bcryptjs_1.default.hash(password, 10);
         const user = await prisma.user.create({
             data: {
-                email,
+                email: normalizedEmail,
                 password: hashedPassword,
-                name,
+                name: name?.trim(),
                 categories: {
                     create: [
                         { name: 'Personal', color: '#10b981' },
@@ -40,7 +56,8 @@ router.post('/register', async (req, res) => {
             }
         });
         const token = jsonwebtoken_1.default.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
-        res.status(201).json({ user, token });
+        setCookie(res, token);
+        res.status(201).json({ user: excludePassword(user), token });
     }
     catch (error) {
         console.error('Registration error:', error);
@@ -51,41 +68,54 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
         }
-        const isMatch = await bcrypt_1.default.compare(password, user.password);
-        if (!isMatch) {
-            // In case we are trying to login with test@example.com which might have no password
-            if (email === 'test@example.com' && user.password === "") {
-                // Allow for legacy test user fallback if needed, but it's better to force them to register a new one.
-                // Actually, let's just let it fail so they know they need a real account, unless they provided empty string.
-                return res.status(401).json({ error: 'Invalid credentials' });
-            }
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-        const token = jsonwebtoken_1.default.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
-        // Fetch user with categories for the frontend
-        const userWithCategories = await prisma.user.findUnique({
-            where: { id: user.id },
+        const normalizedEmail = email.toLowerCase().trim();
+        const user = await prisma.user.findUnique({
+            where: { email: normalizedEmail },
             include: { categories: true }
         });
-        res.json({ user: userWithCategories, token });
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+        // Support empty password legacy users if needed
+        if (user.password === "" && password !== "") {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+        if (user.password !== "") {
+            const isMatch = await bcryptjs_1.default.compare(password, user.password);
+            if (!isMatch) {
+                return res.status(401).json({ error: 'Invalid email or password' });
+            }
+        }
+        const token = jsonwebtoken_1.default.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+        setCookie(res, token);
+        res.json({ user: excludePassword(user), token });
     }
     catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-// Get current user (using token)
+// Logout
+router.post('/logout', (req, res) => {
+    res.clearCookie('token');
+    res.json({ message: 'Logged out successfully' });
+});
+// Get current user (using token from cookie or header)
 router.get('/me', async (req, res) => {
     try {
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        let token = req.cookies?.token;
+        if (!token) {
+            const authHeader = req.headers.authorization;
+            if (authHeader && authHeader.startsWith('Bearer ')) {
+                token = authHeader.split(' ')[1];
+            }
+        }
+        if (!token) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-        const token = authHeader.split(' ')[1];
         const decoded = jsonwebtoken_1.default.verify(token, JWT_SECRET);
         const user = await prisma.user.findUnique({
             where: { id: decoded.userId },
@@ -94,10 +124,10 @@ router.get('/me', async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        res.json({ user });
+        res.json({ user: excludePassword(user) });
     }
     catch (error) {
-        res.status(401).json({ error: 'Invalid token' });
+        res.status(401).json({ error: 'Invalid or expired token' });
     }
 });
 // Guest Login
@@ -109,7 +139,7 @@ router.post('/guest', async (req, res) => {
             include: { categories: true }
         });
         if (!user) {
-            const hashedPassword = await bcrypt_1.default.hash('guestpassword123', 10);
+            const hashedPassword = await bcryptjs_1.default.hash('guestpassword123', 10);
             user = await prisma.user.create({
                 data: {
                     email: guestEmail,
@@ -127,7 +157,8 @@ router.post('/guest', async (req, res) => {
             });
         }
         const token = jsonwebtoken_1.default.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
-        res.json({ user, token });
+        setCookie(res, token);
+        res.json({ user: excludePassword(user), token });
     }
     catch (error) {
         console.error('Guest login error:', error);

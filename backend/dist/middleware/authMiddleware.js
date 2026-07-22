@@ -7,8 +7,12 @@ exports.authenticateToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-for-local-dev';
 const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    let token = req.cookies?.token;
+    // Fallback to Bearer token for backward compatibility or mobile apps if needed
+    if (!token) {
+        const authHeader = req.headers['authorization'];
+        token = authHeader && authHeader.split(' ')[1];
+    }
     if (!token) {
         return res.status(401).json({ error: 'Access token required' });
     }

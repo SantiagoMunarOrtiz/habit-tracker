@@ -1,20 +1,20 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, BarChart2, Award, PlusCircle, CheckCircle, Calendar, Palmtree, LogOut } from 'lucide-react';
+import { BarChart2, Award, PlusCircle, CheckCircle, Calendar, Palmtree, LogOut, Target, BookOpen, Briefcase } from 'lucide-react';
 import { useState } from 'react';
 import { VacationModal } from './VacationModal';
 import type { User } from '../types';
 
-export function Sidebar({ user, onLogout }: { user: User, onLogout?: () => void }) {
+export function Sidebar({ user, onLogout, onNavigate }: { user: User, onLogout?: () => void, onNavigate?: () => void }) {
   const [isVacationModalOpen, setIsVacationModalOpen] = useState(false);
   const location = useLocation();
 
   const handleCreateVacation = async (data: any) => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || '/api'}/vacations`, {
+      await fetch(`${import.meta.env.VITE_API_URL || '/api'}/vacations`, { credentials: 'include',
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          
         },
         body: JSON.stringify({ ...data, userId: user.id })
       });
@@ -31,7 +31,7 @@ export function Sidebar({ user, onLogout }: { user: User, onLogout?: () => void 
         <CheckCircle className="w-8 h-8" />
         HabitSync
       </h1>
-      
+
       <div className="space-y-3 mb-8">
         <button className="w-full flex items-center justify-center gap-2 bg-[#232323] border border-[#333] text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-[#2a2a2a] transition-colors">
           <PlusCircle className="w-5 h-5 text-green-500" />
@@ -40,10 +40,13 @@ export function Sidebar({ user, onLogout }: { user: User, onLogout?: () => void 
       </div>
 
       <nav className="flex-1 space-y-2">
-        <NavItem to="/" icon={<Calendar className="text-green-500" />} label="Spreadsheet" currentPath={location.pathname} />
-        <NavItem to="/dashboard" icon={<Home className="text-green-500" />} label="Dashboard" currentPath={location.pathname} />
-        <NavItem to="/analytics" icon={<BarChart2 className="text-green-500" />} label="Analytics" currentPath={location.pathname} />
-        <NavItem to="/rewards" icon={<Award className="text-green-500" />} label="Rewards" currentPath={location.pathname} />
+        <NavItem to="/" icon={<Calendar className="text-green-500" />} label="Spreadsheet" currentPath={location.pathname} onClick={onNavigate} />
+        <NavItem to="/dashboard" icon={<BookOpen className="text-green-500" />} label="Ideas & Journal" currentPath={location.pathname} onClick={onNavigate} />
+        <NavItem to="/analytics" icon={<BarChart2 className="text-green-500" />} label="Analytics" currentPath={location.pathname} onClick={onNavigate} />
+        <NavItem to="/goals" icon={<Target className="text-blue-500" />} label="Goals & Systems" currentPath={location.pathname} onClick={onNavigate} />
+        <NavItem to="/work" icon={<Briefcase className="text-indigo-500" />} label="Work Planner" currentPath={location.pathname} onClick={onNavigate} />
+        <NavItem to="/reflections" icon={<BookOpen className="text-blue-500" />} label="Daily Reflection" currentPath={location.pathname} onClick={onNavigate} />
+        <NavItem to="/rewards" icon={<Award className="text-green-500" />} label="Rewards" currentPath={location.pathname} onClick={onNavigate} />
       </nav>
 
       <div className="mt-auto">
@@ -55,7 +58,7 @@ export function Sidebar({ user, onLogout }: { user: User, onLogout?: () => void 
           <p className="text-xs text-gray-500 mt-2">{user.points} points</p>
         </div>
 
-        <button 
+        <button
           onClick={() => setIsVacationModalOpen(true)}
           className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-900/50 to-indigo-900/50 hover:from-blue-800/60 hover:to-indigo-800/60 border border-blue-500/30 text-blue-300 font-bold py-3 px-4 rounded-xl transition-all shadow-[0_0_15px_rgba(59,130,246,0.1)] mb-4"
         >
@@ -64,8 +67,8 @@ export function Sidebar({ user, onLogout }: { user: User, onLogout?: () => void 
         </button>
 
         {onLogout && (
-          <button 
-            onClick={onLogout}
+          <button
+            onClick={() => { onLogout(); onNavigate?.(); }}
             className="w-full flex items-center justify-center gap-2 text-gray-500 hover:text-white py-2 transition-colors font-medium text-sm"
           >
             <LogOut className="w-4 h-4" />
@@ -74,19 +77,19 @@ export function Sidebar({ user, onLogout }: { user: User, onLogout?: () => void 
         )}
       </div>
 
-      <VacationModal 
-        isOpen={isVacationModalOpen} 
-        onClose={() => setIsVacationModalOpen(false)} 
-        onSubmit={handleCreateVacation} 
+      <VacationModal
+        isOpen={isVacationModalOpen}
+        onClose={() => setIsVacationModalOpen(false)}
+        onSubmit={handleCreateVacation}
       />
     </div>
   );
 }
 
-function NavItem({ to, icon, label, currentPath }: { to: string; icon: React.ReactNode; label: string; currentPath: string }) {
+function NavItem({ to, icon, label, currentPath, onClick }: { to: string; icon: React.ReactNode; label: string; currentPath: string; onClick?: () => void }) {
   const isActive = currentPath === to;
   return (
-    <Link to={to} className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive ? 'bg-[#2a2a2a] text-white' : 'text-gray-400 hover:bg-[#232323] hover:text-white'}`}>
+    <Link to={to} onClick={onClick} className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive ? 'bg-[#2a2a2a] text-white' : 'text-gray-400 hover:bg-[#232323] hover:text-white'}`}>
       {icon}
       <span className="font-medium">{label}</span>
     </Link>

@@ -20,7 +20,7 @@ const getHabitAnalytics = async (habitId) => {
 };
 exports.getHabitAnalytics = getHabitAnalytics;
 exports.analyticsService = {
-    async getDailyStats(userId, dateStr) {
+    async getDailyStats(userId, dateStr, habitId) {
         // We add T00:00:00 to avoid any timezone offset drift
         const targetDate = new Date(`${dateStr}T00:00:00.000`);
         // Add 24h buffer to targetDateEnd to account for local timezone differences
@@ -28,15 +28,15 @@ exports.analyticsService = {
         targetDateEnd.setHours(targetDateEnd.getHours() + 24);
         const dayOfWeek = targetDate.getDay(); // 0 (Sun) to 6 (Sat)
         // 1. Fetch habits active on this date
+        const habitWhereClause = {
+            userId,
+            isArchived: false
+        };
+        if (habitId) {
+            habitWhereClause.id = habitId;
+        }
         const habits = await prisma.habit.findMany({
-            where: {
-                userId,
-                OR: [
-                    { deletedAt: null },
-                    { deletedAt: { gt: targetDate } }
-                ],
-                // If archived, it shouldn't be archived BEFORE target date
-            }
+            where: habitWhereClause
         });
         // 2. Fetch vacations overlapping with this date
         const vacations = await prisma.vacation.findMany({
@@ -65,8 +65,12 @@ exports.analyticsService = {
             study: { expected: 0, completed: 0 }
         };
         for (const habit of habits) {
-            if (habit.isArchived && habit.updatedAt < targetDate)
-                continue;
+            if (habit.isArchived) {
+                // If it's archived, do not count it for any date >= the date it was archived
+                const archivedDate = new Date(habit.updatedAt).toISOString().split('T')[0];
+                if (dateStr >= archivedDate)
+                    continue;
+            }
             if (!habit.active)
                 continue;
             // Ensure habit is active on this specific date
@@ -177,16 +181,16 @@ exports.analyticsService = {
             progressPercentage: expectedCount === 0 ? null : (completedCount / expectedCount) * 100
         };
     },
-    async getWeeklyStats(userId, dateStr) {
+    async getWeeklyStats(userId, dateStr, habitId) {
         const targetDate = (0, date_fns_1.parseISO)(dateStr);
         const start = (0, date_fns_1.startOfWeek)(targetDate, { weekStartsOn: 1 });
         // Rule: from the start of the current week TO TODAY.
         const end = targetDate;
         const days = (0, date_fns_1.eachDayOfInterval)({ start, end });
-        const dailyBreakdown = await Promise.all(days.map(d => this.getDailyStats(userId, (0, date_fns_1.format)(d, 'yyyy-MM-dd'))));
+        const dailyBreakdown = await Promise.all(days.map((d) => this.getDailyStats(userId, (0, date_fns_1.format)(d, 'yyyy-MM-dd'), habitId)));
         let expectedCount = 0;
         let completedCount = 0;
-        dailyBreakdown.forEach(d => {
+        dailyBreakdown.forEach((d) => {
             expectedCount += d.expectedCount;
             completedCount += d.completedCount;
         });
@@ -200,7 +204,7 @@ exports.analyticsService = {
             dailyBreakdown
         };
     },
-    async getMonthlyStats(userId, year, month, maxDateStr) {
+    async getMonthlyStats(userId, year, month, maxDateStr, habitId) {
         const targetDate = new Date(year, month - 1, 1);
         const start = (0, date_fns_1.startOfMonth)(targetDate);
         // Rule: from the first day of the current month TO TODAY.
@@ -217,10 +221,10 @@ exports.analyticsService = {
             };
         }
         const days = (0, date_fns_1.eachDayOfInterval)({ start, end });
-        const dailyBreakdown = await Promise.all(days.map(d => this.getDailyStats(userId, (0, date_fns_1.format)(d, 'yyyy-MM-dd'))));
+        const dailyBreakdown = await Promise.all(days.map((d) => this.getDailyStats(userId, (0, date_fns_1.format)(d, 'yyyy-MM-dd'), habitId)));
         let expectedCount = 0;
         let completedCount = 0;
-        dailyBreakdown.forEach(d => {
+        dailyBreakdown.forEach((d) => {
             expectedCount += d.expectedCount;
             completedCount += d.completedCount;
         });
@@ -234,12 +238,12 @@ exports.analyticsService = {
             dailyBreakdown
         };
     },
-    async getYearlyStats(userId, year, maxDateStr) {
+    async getYearlyStats(userId, year, maxDateStr, habitId) {
         const monthlyBreakdown = [];
         let expectedCount = 0;
         let completedCount = 0;
         for (let month = 1; month <= 12; month++) {
-            const mStats = await this.getMonthlyStats(userId, year, month, maxDateStr);
+            const mStats = await this.getMonthlyStats(userId, year, month, maxDateStr, habitId);
             monthlyBreakdown.push(mStats);
             expectedCount += mStats.expectedCount;
             completedCount += mStats.completedCount;

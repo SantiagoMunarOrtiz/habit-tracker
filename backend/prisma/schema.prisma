@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -20,12 +20,25 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  categories   Category[]
-  habits       Habit[]
-  goals        Goal[]
-  userRewards  UserReward[]
+  categories       Category[]
+  habits           Habit[]
+  goals            Goal[]
+  userRewards      UserReward[]
   userAchievements UserAchievement[]
-  vacations    Vacation[]
+  vacations        Vacation[]
+  reflections      DailyReflection[]
+
+  workProjects WorkProject[]
+  workTasks    WorkTask[]
+  workCourses  WorkCourse[]
+  lifeReviews  LifeReview[]
+
+  systemRules       SystemRule[]
+  focusSessions     FocusSession[]
+  habitLogs         HabitLog[]
+  habitReschedules  HabitReschedule[]
+  habitAchievements HabitAchievement[]
+  lifeReviewAreas   LifeReviewArea[]
 }
 
 model Category {
@@ -41,93 +54,116 @@ model Category {
 }
 
 model Habit {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   title       String
   description String?
-  
+
   // V2 Core
-  planType    String   @default("Personal") // "Work", "Study", "Personal"
-  difficulty  String   @default("Medium") // "Easy", "Medium", "Hard"
-  
+  planType   String @default("Personal") // "Work", "Study", "Personal"
+  difficulty String @default("Medium") // "Easy", "Medium", "Hard"
+
   // V2 Scheduling
-  scheduleType      String   @default("daily") // "daily", "fixedDays", "flexible"
-  selectedDays      String?  // JSON string e.g., "[1,3,5]" (Mon, Wed, Fri) - for fixedDays
-  targetDaysPerWeek Int?     // e.g., 4 - for flexible
-  restDays          String?  // JSON string e.g., "[0,6]" (Sun, Sat)
-  
+  scheduleType      String  @default("daily") // "daily", "fixedDays", "flexible"
+  selectedDays      String? // JSON string e.g., "[1,3,5]" (Mon, Wed, Fri) - for fixedDays
+  targetDaysPerWeek Int? // e.g., 4 - for flexible
+  restDays          String? // JSON string e.g., "[0,6]" (Sun, Sat)
+
   // V2 Behavioral Science
-  timeOfDay         String?  // "morning", "afternoon", "evening", "any"
-  estimatedDuration Int?     // in minutes
+  timeOfDay         String? // "morning", "afternoon", "evening", "any"
+  estimatedDuration Int? // in minutes
   triggerCue        String?
   ifThenPlan        String?
   motivationPhrase  String?
   miniReward        String?
-  
-  startDate   DateTime @default(now())
-  endDate     DateTime?
-  active      Boolean  @default(true)
-  isArchived  Boolean  @default(false)
-  deletedAt   DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  startDate  DateTime  @default(now())
+  endDate    DateTime?
+  active     Boolean   @default(true)
+  isArchived Boolean   @default(false)
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
   userId     String
   user       User     @relation(fields: [userId], references: [id])
+  goalId     String?
+  goal       Goal?    @relation(fields: [goalId], references: [id], onDelete: SetNull)
 
   logs         HabitLog[]
   reschedules  HabitReschedule[]
   achievements HabitAchievement[]
+  reflections  DailyReflection[]
 }
 
 model HabitLog {
   id        String   @id @default(uuid())
-  date      String   // YYYY-MM-DD format for easier querying
-  status    String   // "completed", "skipped", "failed", "rest", "rescheduled", "vacation"
+  date      String // YYYY-MM-DD format for easier querying
+  status    String // "completed", "skipped", "failed", "rest", "rescheduled", "vacation"
   note      String?
   createdAt DateTime @default(now())
 
-  habitId   String
-  habit     Habit    @relation(fields: [habitId], references: [id])
+  habitId String
+  habit   Habit   @relation(fields: [habitId], references: [id])
+  userId  String?
+  user    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([habitId, date])
 }
 
 model HabitReschedule {
   id           String   @id @default(uuid())
-  originalDate String   // YYYY-MM-DD
-  newDate      String   // YYYY-MM-DD
+  originalDate String // YYYY-MM-DD
+  newDate      String // YYYY-MM-DD
   createdAt    DateTime @default(now())
 
-  habitId      String
-  habit        Habit    @relation(fields: [habitId], references: [id])
+  habitId String
+  habit   Habit   @relation(fields: [habitId], references: [id])
+  userId  String?
+  user    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Vacation {
   id        String   @id @default(uuid())
-  startDate String   // YYYY-MM-DD
-  endDate   String   // YYYY-MM-DD
+  startDate String // YYYY-MM-DD
+  endDate   String // YYYY-MM-DD
   appliesTo String   @default("All") // "All", "Personal", "Work"
   createdAt DateTime @default(now())
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model Goal {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   title      String
   targetDate DateTime?
-  status     String   @default("active") // "active", "completed", "abandoned"
-  createdAt  DateTime @default(now())
+  status     String    @default("active") // "active", "completed", "abandoned"
+  term       String    @default("short") // "short", "medium", "long"
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
 
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
+  userId      String
+  user        User              @relation(fields: [userId], references: [id])
+  rules       SystemRule[]
+  habits      Habit[]
+  reflections DailyReflection[]
+}
+
+model SystemRule {
+  id        String  @id @default(uuid())
+  goalId    String
+  goal      Goal    @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  text      String
+  completed Boolean @default(false)
+  status    String  @default("active") // "active", "paused", "archived"
 }
 
 model Reward {
-  id          String   @id @default(uuid())
+  id          String @id @default(uuid())
   name        String
   icon        String
   description String
@@ -140,23 +176,23 @@ model UserReward {
   id         String   @id @default(uuid())
   dateEarned DateTime @default(now())
 
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  rewardId   String
-  reward     Reward   @relation(fields: [rewardId], references: [id])
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+  rewardId String
+  reward   Reward @relation(fields: [rewardId], references: [id])
 
   @@unique([userId, rewardId])
 }
 
 model Achievement {
-  id              String @id @default(uuid())
+  id              String  @id @default(uuid())
   name            String
   description     String
   unlockCondition String // e.g., "7_DAY_STREAK", "FIRST_FULL_WEEK"
   points          Int
   miniReward      String?
   message         String?
-  
+
   userAchievements UserAchievement[]
 }
 
@@ -173,15 +209,167 @@ model UserAchievement {
 }
 
 model HabitAchievement {
-  id              String   @id @default(uuid())
-  habitId         String
-  habit           Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
-  
-  achievementType String   // e.g., "1_COMPLETION", "3_COMPLETION", "66_COMPLETION"
+  id      String  @id @default(uuid())
+  habitId String
+  habit   Habit   @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  userId  String?
+  user    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  achievementType String // e.g., "1_COMPLETION", "3_COMPLETION", "66_COMPLETION"
   name            String
   description     String
-  
-  dateEarned      DateTime @default(now())
+
+  dateEarned DateTime @default(now())
 
   @@unique([habitId, achievementType])
+}
+
+model DailyReflection {
+  id   String  @id @default(uuid())
+  date String // YYYY-MM-DD
+  note String?
+
+  focusRating        Int?
+  energyRating       Int?
+  satisfactionRating Int?
+
+  q1Progress     String?
+  q2Learned      String?
+  q3Blocked      String?
+  q4NextAction   String?
+  q5ObstaclePlan String?
+
+  goalId  String?
+  goal    Goal?   @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  habitId String?
+  habit   Habit?  @relation(fields: [habitId], references: [id], onDelete: SetNull)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+}
+
+model WorkProject {
+  id           String  @id @default(uuid())
+  title        String
+  area         String // "Work" | "Entrepreneurship"
+  outcome      String?
+  deadline     String? // YYYY-MM-DD
+  progress     Int     @default(0)
+  timeInvested Int     @default(0) // In minutes
+  riskStatus   String  @default("on_track") // "on_track" | "at_risk" | "blocked"
+
+  tasks WorkTask[]
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkTask {
+  id          String  @id @default(uuid())
+  title       String
+  area        String // "Work" | "Entrepreneurship"
+  description String?
+  status      String  @default("inbox") // inbox, next, scheduled, in_progress, waiting, blocked, completed, archived
+  priority    String  @default("medium") // low, medium, high, essential
+
+  deadline      String? // YYYY-MM-DD
+  scheduledDate String? // YYYY-MM-DD
+  scheduledTime String? // HH:MM
+  estimatedTime Int? // minutes
+  actualTime    Int     @default(0) // minutes
+
+  nextAction    String?
+  blocker       String?
+  completionPct Int     @default(0)
+  recurrence    String?
+  notes         String?
+  ifThenPlan    String?
+
+  projectId String?
+  project   WorkProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  focusSessions FocusSession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FocusSession {
+  id     String   @id @default(uuid())
+  taskId String
+  task   WorkTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId String?
+  user   User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  startTime DateTime  @default(now())
+  endTime   DateTime?
+  duration  Int? // in minutes
+  outcome   String?
+  notes     String?
+}
+
+model WorkCourse {
+  id            String  @id @default(uuid())
+  title         String
+  deadline      String?
+  completionPct Int     @default(0)
+  certificate   String?
+  notes         String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model LifeReview {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type   String // "quarterly" | "annual"
+  year   Int
+  cycle  Int // 1-4 for quarters, 1 for annual
+  status String @default("draft") // "draft" | "completed"
+
+  overallSatisfaction Int?
+  responses           String? // JSON containing general Q&A
+  mainPriority        String?
+  threeChanges        String? // JSON for annual changes
+  nextAction          String?
+  actionTargetDate    String?
+  actionStatus        String  @default("not_started") // "not_started", "completed", "postponed", "cancelled"
+  notes               String?
+
+  questionVersion Int @default(1)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  areas LifeReviewArea[]
+
+  @@unique([userId, type, year, cycle])
+}
+
+model LifeReviewArea {
+  id           String     @id @default(uuid())
+  lifeReviewId String
+  lifeReview   LifeReview @relation(fields: [lifeReviewId], references: [id], onDelete: Cascade)
+  userId       String?
+  user         User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  areaName  String // e.g., "Physical health"
+  rating    Int? // 1-10
+  responses String? // JSON storing area-specific Q&A answers
 }

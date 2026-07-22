@@ -72,13 +72,13 @@ export function HabitFormModal({ isOpen, onClose, onSubmit, categories }: HabitF
 
           <div className="bg-[#232323] border border-[#333] p-4 rounded-xl">
             <label className="block text-sm font-medium mb-3 text-gray-300">Mandatory Days</label>
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-1 overflow-x-auto pb-2">
               {daysOfWeek.map((day, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => toggleDay(idx)}
-                  className={`w-10 h-10 rounded-full font-bold transition-colors flex items-center justify-center ${formData.selectedDays.includes(idx) ? 'bg-green-500 text-black' : 'bg-[#111] text-gray-500 border border-[#333] hover:border-green-500/50'}`}
+                  className={`shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full font-bold transition-colors flex items-center justify-center text-sm md:text-base ${formData.selectedDays.includes(idx) ? 'bg-green-500 text-black' : 'bg-[#111] text-gray-500 border border-[#333] hover:border-green-500/50'}`}
                 >
                   {day}
                 </button>

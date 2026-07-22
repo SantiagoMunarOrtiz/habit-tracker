@@ -15,8 +15,8 @@ export function Achievements({ user }: { user: User }) {
   const [expandedHabits, setExpandedHabits] = useState<Record<string, boolean>>({});
 
   const fetchChecklist = () => {
-    fetch(`${API_URL}/achievements/checklist`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    fetch(`${API_URL}/achievements/checklist`, { credentials: 'include',
+      credentials: 'include'
     })
       .then(res => res.json())
       .then(data => {
@@ -35,9 +35,9 @@ export function Achievements({ user }: { user: User }) {
 
   const handleClaim = async (habitId: string, achievementId: string) => {
     try {
-      const res = await fetch(`${API_URL}/achievements/${habitId}/${achievementId}/claim`, {
+      const res = await fetch(`${API_URL}/achievements/${habitId}/${achievementId}/claim`, { credentials: 'include',
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        credentials: 'include'
       });
       if (res.ok) {
         fetchChecklist();

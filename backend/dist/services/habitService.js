@@ -24,12 +24,12 @@ const checkInHabit = async (habitId, date, status, note) => {
             { count: 1, type: "1_COMPLETION", name: "First Step Celebration", description: "You took the first step!" },
             { count: 3, type: "3_COMPLETION", name: "Early Action Celebration", description: "Three days completed. Great start!" },
             { count: 7, type: "7_COMPLETION", name: "First Week Momentum", description: "A full week of progress." },
-            { count: 10, type: "10_COMPLETION", name: "Small Reward / Pink Day", description: "10 completions! Double digits." },
-            { count: 30, type: "30_COMPLETION", name: "Consistency Reward", description: "A month of consistency." },
-            { count: 66, type: "66_COMPLETION", name: "Habit Formation Milestone", description: "Science says it takes 66 days to form a habit. You did it!" },
+            { count: 10, type: "10_COMPLETION", name: "Pink Day", description: "10 completions! Double digits." },
+            { count: 21, type: "21_COMPLETION", name: "Classic Milestone", description: "21 days! A classic milestone." },
+            { count: 66, type: "66_COMPLETION", name: "Science Milestone", description: "Science says it takes 66 days to form a habit." },
             { count: 90, type: "90_COMPLETION", name: "Discipline Badge", description: "90 days of unyielding discipline." },
-            { count: 180, type: "180_COMPLETION", name: "Long-Term Identity Badge", description: "Half a year of success. This is who you are now." },
-            { count: 365, type: "365_COMPLETION", name: "One-Year Discipline Achievement", description: "A full year! Total mastery." },
+            { count: 180, type: "180_COMPLETION", name: "Identity Badge", description: "Half a year of success. This is who you are now." },
+            { count: 365, type: "365_COMPLETION", name: "Year Badge", description: "A full year! Total mastery." },
         ];
         const reached = milestones.find(m => m.count === totalCompletedThisHabit);
         if (reached) {

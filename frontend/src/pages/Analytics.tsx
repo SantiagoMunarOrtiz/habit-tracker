@@ -41,8 +41,7 @@ export function Analytics({ user }: { user: User }) {
 
   useEffect(() => {
     const fetchAnalytics = async () => {
-      const token = localStorage.getItem('token');
-      const headers = { 'Authorization': `Bearer ${token}` };
+      const headers = {  };
       const today = format(new Date(), 'yyyy-MM-dd');
       const year = new Date().getFullYear();
       const month = new Date().getMonth() + 1;
@@ -51,11 +50,11 @@ export function Analytics({ user }: { user: User }) {
 
       try {
         const [daily, weekly, monthly, yearly, habitsData] = await Promise.all([
-          fetch(`${API_URL}/analytics/daily?date=${today}${habitQuery}`, { headers }).then(res => res.json()),
-          fetch(`${API_URL}/analytics/weekly?date=${today}${habitQuery}`, { headers }).then(res => res.json()),
-          fetch(`${API_URL}/analytics/monthly?year=${year}&month=${month}&date=${today}${habitQuery}`, { headers }).then(res => res.json()),
-          fetch(`${API_URL}/analytics/yearly?year=${year}&date=${today}${habitQuery}`, { headers }).then(res => res.json()),
-          fetch(`${API_URL}/habits/user/${user.id}`, { headers }).then(res => res.json())
+          fetch(`${API_URL}/analytics/daily?date=${today}${habitQuery}`, { credentials: 'include', headers }).then(res => res.json()),
+          fetch(`${API_URL}/analytics/weekly?date=${today}${habitQuery}`, { credentials: 'include', headers }).then(res => res.json()),
+          fetch(`${API_URL}/analytics/monthly?year=${year}&month=${month}&date=${today}${habitQuery}`, { credentials: 'include', headers }).then(res => res.json()),
+          fetch(`${API_URL}/analytics/yearly?year=${year}&date=${today}${habitQuery}`, { credentials: 'include', headers }).then(res => res.json()),
+          fetch(`${API_URL}/habits/user/${user.id}`, { credentials: 'include', headers }).then(res => res.json())
         ]);
         setDailyStats(daily);
         setWeeklyStats(weekly);

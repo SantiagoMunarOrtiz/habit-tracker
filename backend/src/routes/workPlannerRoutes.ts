@@ -138,7 +138,8 @@ router.post('/focus', authenticateToken as any, async (req: AuthRequest, res: Re
                 duration,
                 outcome,
                 notes,
-                endTime: new Date()
+                endTime: new Date(),
+                userId: req.user?.userId
             }
         });
 

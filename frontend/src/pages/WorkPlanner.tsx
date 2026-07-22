@@ -30,7 +30,7 @@ export function WorkPlanner({ user }: { user: User }) {
 
     const fetchTasks = async () => {
         try {
-            const res = await fetch(`${API_URL}/work-planner/user/${user.id}/tasks`, { credentials: 'include',
+            const res = await fetch(`${API_URL}/work-planner/user/${user.id}/tasks`, {
                 credentials: 'include'
             });
             if (res.ok) {
@@ -112,7 +112,7 @@ export function WorkPlanner({ user }: { user: User }) {
     const handleDeleteTask = async (id: string) => {
         if (!confirm('Are you sure you want to delete this task?')) return;
         try {
-            await fetch(`${API_URL}/work-planner/tasks/${id}`, { credentials: 'include',
+            await fetch(`${API_URL}/work-planner/tasks/${id}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
@@ -205,9 +205,7 @@ export function WorkPlanner({ user }: { user: User }) {
                                     {t.deadline && <span className="text-xs text-orange-500/80 block mt-1">Due: {t.deadline}</span>}
                                 </div>
                                 <div className="flex gap-2">
-                                    {t.actualTime !== 0 && (
-                                        <button onClick={() => startFocus(t)} className="p-2 bg-indigo-600/20 text-indigo-400 rounded-md hover:bg-indigo-600/40" title="Focus Mode"><Play className="w-4 h-4" /></button>
-                                    )}
+                                    <button onClick={() => startFocus(t)} className="p-2 bg-indigo-600/20 text-indigo-400 rounded-md hover:bg-indigo-600/40" title="Focus Mode"><Play className="w-4 h-4" /></button>
                                     <button onClick={() => handleUpdateStatus(t.id, 'completed')} className="p-2 bg-green-600/20 text-green-400 rounded-md hover:bg-green-600/40" title="Complete"><CheckCircle className="w-4 h-4" /></button>
                                     <button onClick={() => handleDeleteTask(t.id)} className="p-2 bg-red-600/10 text-red-500 rounded-md hover:bg-red-600/30" title="Delete"><Trash2 className="w-4 h-4" /></button>
                                 </div>
@@ -228,9 +226,7 @@ export function WorkPlanner({ user }: { user: User }) {
                                         {t.deadline && <span className="text-xs text-gray-500 block">Due: {t.deadline}</span>}
                                     </div>
                                     <div className="flex gap-1 shrink-0">
-                                        {t.actualTime !== 0 && (
-                                            <button onClick={() => startFocus(t)} className="p-1.5 text-indigo-400 hover:bg-indigo-500/10 rounded" title="Focus Mode"><Play className="w-4 h-4" /></button>
-                                        )}
+                                        <button onClick={() => startFocus(t)} className="p-1.5 text-indigo-400 hover:bg-indigo-500/10 rounded" title="Focus Mode"><Play className="w-4 h-4" /></button>
                                         <button onClick={() => handleUpdateStatus(t.id, 'completed')} className="p-1.5 text-green-500 hover:bg-green-500/10 rounded" title="Complete"><CheckCircle className="w-4 h-4" /></button>
                                         <button onClick={() => handleDeleteTask(t.id)} className="p-1.5 text-red-500 hover:bg-red-500/10 rounded" title="Delete"><Trash2 className="w-4 h-4" /></button>
                                     </div>
@@ -278,6 +274,7 @@ export function WorkPlanner({ user }: { user: User }) {
                                         <span className={`text-xs px-2 py-0.5 rounded-full ${t.priority === 'essential' ? 'bg-orange-500/20 text-orange-400' : 'bg-[#333] text-gray-400'}`}>{t.priority}</span>
                                         <div className="flex gap-1">
                                             {(t.status === 'pending' || t.status === 'inbox') && <button onClick={() => handleUpdateStatus(t.id, 'in_progress')} className="text-gray-500 hover:text-blue-500 p-1" title="Start Task"><ArrowRight className="w-4 h-4" /></button>}
+                                            {t.status !== 'completed' && t.status !== 'failed' && <button onClick={() => startFocus(t)} className="text-indigo-400 hover:text-indigo-300 p-1" title="Focus Mode"><Play className="w-4 h-4" /></button>}
                                             {t.status !== 'completed' && <button onClick={() => handleUpdateStatus(t.id, 'completed')} className="text-gray-500 hover:text-green-500 p-1" title="Complete"><CheckCircle className="w-4 h-4" /></button>}
                                             {t.status !== 'failed' && <button onClick={() => handleUpdateStatus(t.id, 'failed')} className="text-gray-500 hover:text-red-500 p-1" title="Fail"><XCircle className="w-4 h-4" /></button>}
                                         </div>

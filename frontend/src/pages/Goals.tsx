@@ -24,7 +24,7 @@ export function Goals({ user }: { user: User }) {
 
     const fetchGoals = async () => {
         try {
-            const res = await fetch(`${API_URL}/goals/user/${user.id}`, { credentials: 'include',
+            const res = await fetch(`${API_URL}/goals/user/${user.id}`, {
                 credentials: 'include'
             });
             const data = await res.json();
@@ -112,7 +112,7 @@ export function Goals({ user }: { user: User }) {
     const handleDeleteGoal = async (id: string) => {
         if (!confirm('Are you sure you want to delete this goal?')) return;
         try {
-            await fetch(`${API_URL}/goals/${id}`, { credentials: 'include',
+            await fetch(`${API_URL}/goals/${id}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
@@ -195,7 +195,7 @@ export function Goals({ user }: { user: User }) {
                             <button onClick={() => handleUpdateGoal(goal.id, { status: goal.status === 'completed' ? 'active' : 'completed' })} className="text-gray-400 hover:text-green-500 transition-colors shrink-0">
                                 {goal.status === 'completed' ? <CheckCircle className="w-6 h-6 text-green-500" /> : <Circle className="w-6 h-6" />}
                             </button>
-                            <h3 className={`text-xl font-bold ${goal.status === 'completed' ? 'text-gray-500 line-through' : 'text-gray-200'} truncate`}>
+                            <h3 className={`text-xl font-bold ${goal.status === 'completed' ? 'text-gray-500 line-through' : 'text-gray-200'} break-words leading-tight`}>
                                 {goal.title}
                             </h3>
                         </div>

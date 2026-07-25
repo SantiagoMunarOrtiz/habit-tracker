@@ -259,7 +259,7 @@ export function Goals({ user }: { user: User }) {
                                             {habit.title}
                                         </div>
                                         <div className="flex items-center gap-2 text-xs">
-                                            <span className="text-blue-400 font-bold">{completedCount} {completedCount === 1 ? 'time' : 'times'}</span>
+                                            <span className="text-orange-500 font-bold flex items-center gap-1">🔥 {completedCount}</span>
                                             <span className="text-gray-600">|</span>
                                             <span className="text-gray-500">{habit.scheduleType}</span>
                                         </div>

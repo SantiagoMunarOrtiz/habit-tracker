@@ -251,13 +251,18 @@ export function Goals({ user }: { user: User }) {
                         <div className="space-y-2">
                             {goal.habits?.map(habit => {
                                 const isMissed = isHabitMissedRepeatedly(habit);
+                                const completedCount = habit.logs?.filter(l => l.status === 'completed').length || 0;
                                 return (
                                     <div key={habit.id} className={`flex justify-between items-center ${isMissed ? 'bg-red-900/10 border border-red-500/20' : 'bg-[#222]'} p-2 rounded-lg text-sm`}>
                                         <div className={`flex items-center gap-2 ${isMissed ? 'text-red-300' : 'text-gray-300'}`}>
                                             <ListTodo className={`w-4 h-4 ${isMissed ? 'text-red-400' : 'text-gray-500'}`} />
                                             {habit.title}
                                         </div>
-                                        <span className="text-xs text-gray-500">{habit.scheduleType}</span>
+                                        <div className="flex items-center gap-2 text-xs">
+                                            <span className="text-blue-400 font-bold">{completedCount} {completedCount === 1 ? 'time' : 'times'}</span>
+                                            <span className="text-gray-600">|</span>
+                                            <span className="text-gray-500">{habit.scheduleType}</span>
+                                        </div>
                                     </div>
                                 );
                             })}

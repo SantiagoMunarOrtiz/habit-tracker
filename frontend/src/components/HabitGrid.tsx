@@ -343,6 +343,9 @@ export function HabitGrid({ habits, vacations, daysArray, todayStr, monthName, o
             <div key={i} className="flex justify-between items-center bg-[#222] border border-[#333] rounded-xl p-4 shadow">
               <div className="flex flex-col">
                 <span className="font-bold text-gray-200">{h.title}</span>
+                <span className="text-[10px] text-blue-400 font-bold uppercase tracking-wider mt-0.5">
+                   Total: {h.logs?.filter(l => l.status === 'completed').length || 0}
+                </span>
                 <div className="flex items-center gap-2 mt-1">
                   {!isMandatory && !isCompleted && !isVacationDay && (
                      <span className="text-[10px] uppercase font-bold text-blue-400 bg-blue-900/30 px-2 py-0.5 rounded">Optional</span>

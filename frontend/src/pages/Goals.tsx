@@ -8,13 +8,13 @@ const API_URL = import.meta.env.VITE_API_URL || '/api';
 export function Goals({ user }: { user: User }) {
     const [goals, setGoals] = useState<Goal[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
+
     // Create Goal form state
     const [newTitle, setNewTitle] = useState('');
     const [newTerm, setNewTerm] = useState<'short' | 'medium' | 'long'>('short');
     const [newTargetDate, setNewTargetDate] = useState('');
     const [newRules, setNewRules] = useState<string[]>(['']);
-    
+
     // View state
     const [showArchived, setShowArchived] = useState(false);
 
@@ -28,7 +28,12 @@ export function Goals({ user }: { user: User }) {
                 credentials: 'include'
             });
             const data = await res.json();
-            setGoals(data);
+            if (res.ok && Array.isArray(data)) {
+                setGoals(data);
+            } else {
+                console.error('Failed to fetch goals:', data);
+                setGoals([]);
+            }
         } catch (error) {
             console.error('Error fetching goals:', error);
         }
@@ -45,11 +50,12 @@ export function Goals({ user }: { user: User }) {
         try {
             const rulesFiltered = newRules.filter(r => r.trim() !== '').map(r => ({ text: r }));
 
-            await fetch(`${API_URL}/goals`, { credentials: 'include',
+            await fetch(`${API_URL}/goals`, {
+                credentials: 'include',
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    
+
                 },
                 body: JSON.stringify({
                     title: newTitle,
@@ -73,11 +79,12 @@ export function Goals({ user }: { user: User }) {
 
     const handleCreateHabitForGoal = async (habitData: Record<string, unknown>) => {
         try {
-            await fetch(`${API_URL}/habits`, { credentials: 'include',
+            await fetch(`${API_URL}/habits`, {
+                credentials: 'include',
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    
+
                 },
                 body: JSON.stringify({
                     ...habitData,
@@ -95,11 +102,12 @@ export function Goals({ user }: { user: User }) {
 
     const handleUpdateGoal = async (id: string, updates: Partial<Goal>) => {
         try {
-            await fetch(`${API_URL}/goals/${id}`, { credentials: 'include',
+            await fetch(`${API_URL}/goals/${id}`, {
+                credentials: 'include',
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    
+
                 },
                 body: JSON.stringify(updates)
             });
@@ -124,11 +132,12 @@ export function Goals({ user }: { user: User }) {
 
     const handleToggleRule = async (rule: SystemRule) => {
         try {
-            await fetch(`${API_URL}/goals/rules/${rule.id}`, { credentials: 'include',
+            await fetch(`${API_URL}/goals/rules/${rule.id}`, {
+                credentials: 'include',
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    
+
                 },
                 body: JSON.stringify({ completed: !rule.completed })
             });
@@ -137,14 +146,15 @@ export function Goals({ user }: { user: User }) {
             console.error('Error toggling rule:', error);
         }
     };
-    
+
     const handleUpdateRuleStatus = async (rule: SystemRule, status: string) => {
         try {
-            await fetch(`${API_URL}/goals/rules/${rule.id}`, { credentials: 'include',
+            await fetch(`${API_URL}/goals/rules/${rule.id}`, {
+                credentials: 'include',
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    
+
                 },
                 body: JSON.stringify({ status })
             });
@@ -157,12 +167,12 @@ export function Goals({ user }: { user: User }) {
     const calculateGoalProgress = (goal: Goal) => {
         const rules = goal.rules || [];
         const habits = goal.habits || [];
-        
+
         const totalItems = rules.length + habits.length;
         if (totalItems === 0) return 0;
-        
+
         let completedScore = rules.filter(r => r.completed).length;
-        
+
         habits.forEach(h => {
             const completedCount = h.logs?.filter(l => l.status === 'completed').length || 0;
             if (h.goalTargetCount) {
@@ -207,7 +217,7 @@ export function Goals({ user }: { user: User }) {
                             <p className="text-xs text-gray-500 ml-9">Deadline: {new Date(goal.targetDate).toLocaleDateString()}</p>
                         )}
                     </div>
-                    
+
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => handleUpdateGoal(goal.id, { status: isPaused ? 'active' : 'paused' })} className="text-gray-500 hover:text-blue-500 p-1" title={isPaused ? "Resume" : "Pause"}>
                             {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
@@ -220,7 +230,7 @@ export function Goals({ user }: { user: User }) {
                         </button>
                     </div>
                 </div>
-                
+
                 {/* Progress Bar */}
                 <div className="w-full bg-[#222] rounded-full h-1.5 mt-1">
                     <div className="bg-blue-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
@@ -232,7 +242,7 @@ export function Goals({ user }: { user: User }) {
                         <span>This goal lacks an effective system. Add a recurring action or mandatory rule.</span>
                     </div>
                 )}
-                
+
                 {goal.habits?.some(isHabitMissedRepeatedly) && (
                     <div className="bg-red-900/20 border border-red-500/30 text-red-400 text-xs p-2 rounded-lg flex items-start gap-2 mt-2">
                         <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -245,7 +255,7 @@ export function Goals({ user }: { user: User }) {
                     <div>
                         <div className="flex justify-between items-center mb-2">
                             <h4 className="text-xs font-bold text-gray-500 tracking-wider uppercase">Recurring Systems</h4>
-                            <button 
+                            <button
                                 onClick={() => { setActiveGoalId(goal.id); setIsHabitModalOpen(true); }}
                                 className="text-xs text-blue-500 hover:text-blue-400 flex items-center gap-1"
                             >
@@ -463,9 +473,9 @@ export function Goals({ user }: { user: User }) {
                     </div>
                 </div>
             )}
-            
+
             {/* Create Habit for Goal Modal */}
-            <HabitFormModal 
+            <HabitFormModal
                 isOpen={isHabitModalOpen}
                 onClose={() => { setIsHabitModalOpen(false); setActiveGoalId(null); }}
                 onSubmit={handleCreateHabitForGoal}

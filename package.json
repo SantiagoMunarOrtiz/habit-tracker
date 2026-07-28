@@ -2,6 +2,10 @@
   "name": "habit-tracker-app",
   "version": "1.0.0",
   "description": "",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
     "postinstall": "npm run install:all",
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",

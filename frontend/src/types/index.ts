@@ -18,6 +18,7 @@ export interface Habit {
   endDate?: string;
   createdAt?: string;
   goalId?: string | null;
+  goalTargetCount?: number | null;
   logs: { date: string; status: string; note?: string }[];
 }
 

@@ -164,8 +164,12 @@ export function Goals({ user }: { user: User }) {
         let completedScore = rules.filter(r => r.completed).length;
         
         habits.forEach(h => {
-            const hasCompletedLog = h.logs?.some(l => l.status === 'completed');
-            if (hasCompletedLog) completedScore += 1;
+            const completedCount = h.logs?.filter(l => l.status === 'completed').length || 0;
+            if (h.goalTargetCount) {
+                completedScore += Math.min(completedCount / h.goalTargetCount, 1);
+            } else {
+                if (completedCount > 0) completedScore += 1;
+            }
         });
 
         return Math.round((completedScore / totalItems) * 100);
@@ -259,7 +263,9 @@ export function Goals({ user }: { user: User }) {
                                             {habit.title}
                                         </div>
                                         <div className="flex items-center gap-2 text-xs">
-                                            <span className="text-orange-500 font-bold flex items-center gap-1">🔥 {completedCount}</span>
+                                            <span className="text-orange-500 font-bold flex items-center gap-1">
+                                                🔥 {completedCount} {habit.goalTargetCount ? `/ ${habit.goalTargetCount}` : ''}
+                                            </span>
                                             <span className="text-gray-600">|</span>
                                             <span className="text-gray-500">{habit.scheduleType}</span>
                                         </div>
@@ -464,6 +470,8 @@ export function Goals({ user }: { user: User }) {
                 onClose={() => { setIsHabitModalOpen(false); setActiveGoalId(null); }}
                 onSubmit={handleCreateHabitForGoal}
                 categories={user.categories || []}
+                goals={goals}
+                initialGoalId={activeGoalId || ''}
             />
         </div>
     );

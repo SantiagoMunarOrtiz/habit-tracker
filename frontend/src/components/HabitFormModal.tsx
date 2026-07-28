@@ -5,9 +5,11 @@ interface HabitFormModalProps {
   onClose: () => void;
   onSubmit: (data: any) => void;
   categories: { id: string; name: string }[];
+  goals?: { id: string; title: string }[];
+  initialGoalId?: string;
 }
 
-export function HabitFormModal({ isOpen, onClose, onSubmit, categories }: HabitFormModalProps) {
+export function HabitFormModal({ isOpen, onClose, onSubmit, categories, goals = [], initialGoalId = '' }: HabitFormModalProps) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -18,10 +20,19 @@ export function HabitFormModal({ isOpen, onClose, onSubmit, categories }: HabitF
     selectedDays: [0, 1, 2, 3, 4, 5, 6], // default to all days (M-S)
     targetDaysPerWeek: 3,
     ifThenPlan: '',
-    miniReward: ''
+    miniReward: '',
+    goalId: initialGoalId,
+    goalTargetCount: ''
   });
 
   if (!isOpen) return null;
+
+  // Sync initialGoalId when it changes and modal opens
+  React.useEffect(() => {
+    if (isOpen && initialGoalId) {
+      setFormData(prev => ({ ...prev, goalId: initialGoalId }));
+    }
+  }, [isOpen, initialGoalId]);
 
   const toggleDay = (dayIndex: number) => {
     setFormData(prev => {
@@ -59,7 +70,6 @@ export function HabitFormModal({ isOpen, onClose, onSubmit, categories }: HabitF
                 <option value="Work">Work</option>
                 <option value="Study">Study</option>
               </select>
-            </div>
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-400">Difficulty</label>
               <select className="w-full bg-[#232323] border border-[#444] text-white rounded-lg p-3" value={formData.difficulty} onChange={e => setFormData({...formData, difficulty: e.target.value})}>
@@ -68,6 +78,29 @@ export function HabitFormModal({ isOpen, onClose, onSubmit, categories }: HabitF
                 <option value="Hard">Hard</option>
               </select>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-400">Link to Goal (Optional)</label>
+              <select className="w-full bg-[#232323] border border-[#444] text-white rounded-lg p-3" value={formData.goalId} onChange={e => setFormData({...formData, goalId: e.target.value})}>
+                <option value="">No Goal</option>
+                {goals.map(g => <option key={g.id} value={g.id}>{g.title}</option>)}
+              </select>
+            </div>
+            {formData.goalId && (
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-400">Target Completions</label>
+                <input 
+                  type="number" 
+                  min="1"
+                  className="w-full bg-[#232323] border border-[#444] text-white rounded-lg p-3 focus:outline-none focus:border-green-500" 
+                  value={formData.goalTargetCount} 
+                  onChange={e => setFormData({...formData, goalTargetCount: e.target.value})} 
+                  placeholder="e.g., 50" 
+                />
+              </div>
+            )}
           </div>
 
           <div className="bg-[#232323] border border-[#333] p-4 rounded-xl">

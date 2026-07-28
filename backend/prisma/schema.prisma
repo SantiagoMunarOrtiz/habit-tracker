@@ -88,8 +88,9 @@ model Habit {
   category   Category @relation(fields: [categoryId], references: [id])
   userId     String
   user       User     @relation(fields: [userId], references: [id])
-  goalId     String?
-  goal       Goal?    @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  goalId          String?
+  goalTargetCount Int?
+  goal            Goal?    @relation(fields: [goalId], references: [id], onDelete: SetNull)
 
   logs         HabitLog[]
   reschedules  HabitReschedule[]

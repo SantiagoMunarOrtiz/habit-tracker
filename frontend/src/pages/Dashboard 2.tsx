@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { PlusCircle, Check, Trash2, Palmtree } from 'lucide-react';
 import { HabitFormModal } from '../components/HabitFormModal';
-import type { User, Habit, Vacation } from '../types';
+import type { User, Habit, Vacation, Goal } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export function Dashboard({ user }: { user: User }) {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [vacations, setVacations] = useState<Vacation[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [recommendation, setRecommendation] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -62,10 +63,23 @@ export function Dashboard({ user }: { user: User }) {
     }
   };
 
+  const fetchGoals = async () => {
+    try {
+      const res = await fetch(`${API_URL}/goals/user/${user.id}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await res.json();
+      setGoals(data);
+    } catch (error) {
+      console.error('Error fetching goals:', error);
+    }
+  };
+
   useEffect(() => {
     fetchHabits();
     fetchRecommendation();
     fetchVacations();
+    fetchGoals();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.id]);
 
@@ -309,6 +323,7 @@ export function Dashboard({ user }: { user: User }) {
         onClose={() => setIsModalOpen(false)} 
         onSubmit={handleCreateHabit}
         categories={user.categories}
+        goals={goals}
       />
     </div>
   );

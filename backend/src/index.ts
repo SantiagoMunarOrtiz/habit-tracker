@@ -47,7 +47,7 @@ app.use('/api/life-reviews', authenticateToken, lifeReviewRoutes);
 import { PrismaClient } from '@prisma/client';
 app.get('/api/debug', async (req, res) => {
   try {
-    const prisma = new PrismaClient();
+    const prisma = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || "postgresql://neondb_owner:npg_s57lHUvtwBod@ep-young-wave-ap5ir4ms-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require" } } });
     await prisma.$connect();
     res.json({ status: 'Prisma is connected!', dbUrlConfigured: !!process.env.DATABASE_URL });
   } catch (error: any) {

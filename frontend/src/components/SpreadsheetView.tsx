@@ -53,11 +53,16 @@ export function SpreadsheetView({ user }: { user: User }) {
 
   const fetchHabits = async () => {
     try {
-      const res = await fetch(`${API_URL}/habits/user/${user.id}`, { credentials: 'include',
+      const res = await fetch(`${API_URL}/habits/user/${user.id}`, {
+        credentials: 'include',
         credentials: 'include'
       });
       const data = await res.json();
-      setHabits(data);
+      if (res.ok && Array.isArray(data)) {
+        setHabits(data);
+      } else {
+        console.error('Failed to fetch habits:', data);
+      }
     } catch (error) {
       console.error('Error fetching habits:', error);
     }
@@ -69,11 +74,12 @@ export function SpreadsheetView({ user }: { user: User }) {
   const handleCheckIn = async (habitId: string, dateStr: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'completed' ? 'skipped' : 'completed';
-      await fetch(`${API_URL}/habits/${habitId}/checkin`, { credentials: 'include',
+      await fetch(`${API_URL}/habits/${habitId}/checkin`, {
+        credentials: 'include',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          
+
         },
         body: JSON.stringify({ date: dateStr, status: newStatus })
       });
@@ -85,11 +91,12 @@ export function SpreadsheetView({ user }: { user: User }) {
 
   const handleCreateHabit = async (data: any) => {
     try {
-      await fetch(`${API_URL}/habits`, { credentials: 'include',
+      await fetch(`${API_URL}/habits`, {
+        credentials: 'include',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          
+
         },
         body: JSON.stringify({
           ...data,
@@ -106,7 +113,8 @@ export function SpreadsheetView({ user }: { user: User }) {
   const handleArchive = async (habitId: string) => {
     if (!confirm('Are you sure you want to delete this habit? Its historical data will be archived for your charts.')) return;
     try {
-      await fetch(`${API_URL}/habits/${habitId}/archive`, { credentials: 'include',
+      await fetch(`${API_URL}/habits/${habitId}/archive`, {
+        credentials: 'include',
         method: 'PATCH',
         credentials: 'include'
       });

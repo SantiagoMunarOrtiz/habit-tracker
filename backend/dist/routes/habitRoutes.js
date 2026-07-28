@@ -9,7 +9,7 @@ const habitService_1 = require("../services/habitService");
 const router = express_1.default.Router();
 const prisma = new client_1.PrismaClient();
 router.post('/', async (req, res) => {
-    const { title, description, categoryId, userId, planType, difficulty, scheduleType, selectedDays, targetDaysPerWeek, restDays, timeOfDay, estimatedDuration, triggerCue, ifThenPlan, motivationPhrase, miniReward } = req.body;
+    const { title, description, categoryId, userId, planType, difficulty, scheduleType, selectedDays, targetDaysPerWeek, restDays, timeOfDay, estimatedDuration, triggerCue, ifThenPlan, motivationPhrase, miniReward, goalId, goalTargetCount } = req.body;
     try {
         const habit = await prisma.habit.create({
             data: {
@@ -20,7 +20,9 @@ router.post('/', async (req, res) => {
                 selectedDays: selectedDays ? JSON.stringify(selectedDays) : null,
                 targetDaysPerWeek: targetDaysPerWeek || null,
                 restDays: restDays ? JSON.stringify(restDays) : null,
-                timeOfDay, estimatedDuration, triggerCue, ifThenPlan, motivationPhrase, miniReward
+                timeOfDay, estimatedDuration, triggerCue, ifThenPlan, motivationPhrase, miniReward,
+                goalId: goalId || null,
+                goalTargetCount: goalTargetCount ? parseInt(goalTargetCount, 10) : null
             },
             include: { category: true }
         });
@@ -44,7 +46,7 @@ router.get('/user/:userId', async (req, res) => {
     }
 });
 router.put('/:id', async (req, res) => {
-    const { title, description, active, planType, difficulty, scheduleType, selectedDays, targetDaysPerWeek, restDays, timeOfDay, estimatedDuration, triggerCue, ifThenPlan, motivationPhrase, miniReward } = req.body;
+    const { title, description, active, planType, difficulty, scheduleType, selectedDays, targetDaysPerWeek, restDays, timeOfDay, estimatedDuration, triggerCue, ifThenPlan, motivationPhrase, miniReward, goalId, goalTargetCount } = req.body;
     try {
         const habit = await prisma.habit.update({
             where: { id: req.params.id },
@@ -54,7 +56,9 @@ router.put('/:id', async (req, res) => {
                 selectedDays: selectedDays ? JSON.stringify(selectedDays) : undefined,
                 targetDaysPerWeek,
                 restDays: restDays ? JSON.stringify(restDays) : undefined,
-                timeOfDay, estimatedDuration, triggerCue, ifThenPlan, motivationPhrase, miniReward
+                timeOfDay, estimatedDuration, triggerCue, ifThenPlan, motivationPhrase, miniReward,
+                goalId: goalId !== undefined ? (goalId || null) : undefined,
+                goalTargetCount: goalTargetCount !== undefined ? (goalTargetCount ? parseInt(goalTargetCount, 10) : null) : undefined
             },
             include: { category: true }
         });

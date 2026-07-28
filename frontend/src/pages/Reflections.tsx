@@ -52,8 +52,8 @@ export function Reflections({ user }: { user: User }) {
     const fetchGoalsAndHabits = async () => {
         try {
             const [goalsRes, habitsRes] = await Promise.all([
-                fetch(`${API_URL}/goals/user/${user.id}`, { credentials: 'include', credentials: 'include' }),
-                fetch(`${API_URL}/habits/user/${user.id}`, { credentials: 'include', credentials: 'include' })
+                fetch(`${API_URL}/goals/user/${user.id}`, { credentials: 'include' }),
+                fetch(`${API_URL}/habits/user/${user.id}`, { credentials: 'include' })
             ]);
             
             if (goalsRes.ok) setGoals(await goalsRes.json());

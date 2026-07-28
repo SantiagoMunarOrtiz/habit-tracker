@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, L
 import { format } from 'date-fns';
 import type { User } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL || '/api'; 
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 interface DailyStats {
   date: string;
@@ -41,7 +41,7 @@ export function Analytics({ user }: { user: User }) {
 
   useEffect(() => {
     const fetchAnalytics = async () => {
-      const headers = {  };
+      const headers = {};
       const today = format(new Date(), 'yyyy-MM-dd');
       const year = new Date().getFullYear();
       const month = new Date().getMonth() + 1;
@@ -60,7 +60,11 @@ export function Analytics({ user }: { user: User }) {
         setWeeklyStats(weekly);
         setMonthlyStats(monthly);
         setYearlyStats(yearly);
-        setHabits(habitsData.filter((h: any) => !h.isArchived));
+        if (Array.isArray(habitsData)) {
+          setHabits(habitsData.filter((h: any) => !h.isArchived));
+        } else {
+          setHabits([]);
+        }
       } catch (e) {
         console.error('Failed to fetch analytics', e);
       }
@@ -85,7 +89,7 @@ export function Analytics({ user }: { user: User }) {
       const sortedLogs = [...habit.logs]
         .filter(l => l.status === 'completed')
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      
+
       let currentStreak = 0;
       let checkDate = new Date();
       checkDate.setHours(0, 0, 0, 0);
@@ -108,8 +112,8 @@ export function Analytics({ user }: { user: User }) {
     <div className="p-6 text-white space-y-8 h-full overflow-y-auto">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold">Progress Analytics</h2>
-        <select 
-          value={selectedHabitId} 
+        <select
+          value={selectedHabitId}
           onChange={(e) => setSelectedHabitId(e.target.value)}
           className="bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2 outline-none focus:border-indigo-500"
         >
@@ -119,7 +123,7 @@ export function Analytics({ user }: { user: User }) {
           ))}
         </select>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Daily Summary */}
         <div className="bg-gray-800 p-6 rounded-lg">
@@ -134,7 +138,7 @@ export function Analytics({ user }: { user: User }) {
             </>
           )}
         </div>
-        
+
         {/* Weekly Summary */}
         <div className="bg-gray-800 p-6 rounded-lg">
           <h3 className="text-lg font-semibold mb-2">This Week</h3>
@@ -187,12 +191,12 @@ export function Analytics({ user }: { user: User }) {
             </BarChart>
           </ResponsiveContainer>
         </div>
-        
+
         {/* Monthly Trend */}
         <div className="bg-gray-800 p-6 rounded-lg h-80 relative">
           <h3 className="text-lg font-semibold mb-4">Monthly Trend (%)</h3>
           {(!monthlyStats?.dailyBreakdown || monthlyStats.dailyBreakdown.length === 0) ? (
-             <div className="absolute inset-0 flex items-center justify-center text-gray-500">No data available for this month</div>
+            <div className="absolute inset-0 flex items-center justify-center text-gray-500">No data available for this month</div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={monthlyStats.dailyBreakdown}>
@@ -210,7 +214,7 @@ export function Analytics({ user }: { user: User }) {
         <div className="bg-gray-800 p-6 rounded-lg h-80 relative">
           <h3 className="text-lg font-semibold mb-4">Yearly Progress by Month (%)</h3>
           {(!yearlyStats?.monthlyBreakdown || yearlyStats.monthlyBreakdown.length === 0) ? (
-             <div className="absolute inset-0 flex items-center justify-center text-gray-500">No data available for this year</div>
+            <div className="absolute inset-0 flex items-center justify-center text-gray-500">No data available for this year</div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={yearlyStats.monthlyBreakdown}>
@@ -233,7 +237,7 @@ export function Analytics({ user }: { user: User }) {
             {monthlyStats?.dailyBreakdown?.map((day, i) => {
               const d = new Date(`${day.date}T12:00:00`);
               const offset = i === 0 ? d.getDay() : 0;
-              
+
               let bgColor = 'bg-gray-700'; // None / default
               if (day.status === 'Golden') bgColor = 'bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)]';
               else if (day.status === 'Completed') bgColor = 'bg-green-500';
@@ -245,7 +249,7 @@ export function Analytics({ user }: { user: User }) {
               return (
                 <React.Fragment key={i}>
                   {i === 0 && Array.from({ length: offset }).map((_, idx) => <div key={`empty-${idx}`} />)}
-                  <div 
+                  <div
                     title={`${day.date}: ${day.status}`}
                     className={`h-12 rounded flex flex-col items-center justify-center transition-all ${bgColor}`}
                   >
@@ -260,34 +264,34 @@ export function Analytics({ user }: { user: User }) {
         {/* Milestone & Rewards & Streaks Progress */}
         <div className="bg-gray-800 p-6 rounded-lg col-span-1 lg:col-span-2 flex flex-col md:flex-row gap-6">
           <div className="flex-1 bg-gray-900 rounded p-4 border border-gray-700">
-             <h4 className="font-bold text-gray-300 mb-2">Longest Active Streak</h4>
-             <p className="text-4xl font-black text-indigo-400">{maxStreak} Days</p>
-             <p className="text-sm text-gray-500 mt-1">Maximum continuous completions</p>
+            <h4 className="font-bold text-gray-300 mb-2">Longest Active Streak</h4>
+            <p className="text-4xl font-black text-indigo-400">{maxStreak} Days</p>
+            <p className="text-sm text-gray-500 mt-1">Maximum continuous completions</p>
           </div>
           <div className="flex-1 bg-gray-900 rounded p-4 border border-gray-700 max-h-48 overflow-y-auto">
-             <h4 className="font-bold text-gray-300 mb-2">Active Habits Completions</h4>
-             {habits.length === 0 ? (
-               <p className="text-sm text-gray-500 mt-2">No active habits</p>
-             ) : (
-               <div className="space-y-3 mt-3">
-                 {habits.map((habit: any) => {
-                   const completedDays = habit.logs ? habit.logs.filter((l: any) => l.status === 'completed').length : 0;
-                   return (
-                     <div key={habit.id} className="flex justify-between items-center bg-gray-800 p-2 rounded">
-                       <span className="text-sm font-medium text-gray-200">{habit.title}</span>
-                       <span className="text-sm font-bold text-pink-400">{completedDays} days</span>
-                     </div>
-                   );
-                 })}
-               </div>
-             )}
+            <h4 className="font-bold text-gray-300 mb-2">Active Habits Completions</h4>
+            {habits.length === 0 ? (
+              <p className="text-sm text-gray-500 mt-2">No active habits</p>
+            ) : (
+              <div className="space-y-3 mt-3">
+                {habits.map((habit: any) => {
+                  const completedDays = habit.logs ? habit.logs.filter((l: any) => l.status === 'completed').length : 0;
+                  return (
+                    <div key={habit.id} className="flex justify-between items-center bg-gray-800 p-2 rounded">
+                      <span className="text-sm font-medium text-gray-200">{habit.title}</span>
+                      <span className="text-sm font-bold text-pink-400">{completedDays} days</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
           <div className="flex-1 bg-gray-900 rounded p-4 border border-gray-700">
-             <h4 className="font-bold text-gray-300 mb-2">Next Mini Reward</h4>
-             <div className="flex items-center gap-4 mt-2">
-               <div className="w-16 h-16 rounded-full border-4 border-yellow-500 flex items-center justify-center font-bold text-lg">{miniRewardPercentage}%</div>
-               <p className="text-sm text-gray-400">{miniRewardProgress} / 10 days toward a Golden Day reward!</p>
-             </div>
+            <h4 className="font-bold text-gray-300 mb-2">Next Mini Reward</h4>
+            <div className="flex items-center gap-4 mt-2">
+              <div className="w-16 h-16 rounded-full border-4 border-yellow-500 flex items-center justify-center font-bold text-lg">{miniRewardPercentage}%</div>
+              <p className="text-sm text-gray-400">{miniRewardProgress} / 10 days toward a Golden Day reward!</p>
+            </div>
           </div>
         </div>
 

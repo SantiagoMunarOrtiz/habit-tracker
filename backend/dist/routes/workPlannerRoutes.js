@@ -138,7 +138,8 @@ router.post('/focus', authMiddleware_1.authenticateToken, async (req, res) => {
                 duration,
                 outcome,
                 notes,
-                endTime: new Date()
+                endTime: new Date(),
+                userId: req.user?.userId
             }
         });
         // Update task actual time

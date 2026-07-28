@@ -25,7 +25,7 @@ const excludePassword = (user: any) => {
 router.post('/register', async (req, res) => {
   try {
     const { email, password, name } = req.body;
-    
+
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
@@ -42,7 +42,7 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     const user = await prisma.user.create({
       data: {
         email: normalizedEmail,
@@ -63,11 +63,11 @@ router.post('/register', async (req, res) => {
 
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
     setCookie(res, token);
-    
+
     res.status(201).json({ user: excludePassword(user), token });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message || String(error) });
   }
 });
 
@@ -82,7 +82,7 @@ router.post('/login', async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    const user = await prisma.user.findUnique({ 
+    const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
       include: { categories: true }
     });
@@ -105,11 +105,11 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
     setCookie(res, token);
-    
+
     res.json({ user: excludePassword(user), token });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message || String(error) });
   }
 });
 
@@ -123,7 +123,7 @@ router.post('/logout', (req, res) => {
 router.get('/me', async (req, res) => {
   try {
     let token = req.cookies?.token;
-    
+
     if (!token) {
       const authHeader = req.headers.authorization;
       if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -134,18 +134,18 @@ router.get('/me', async (req, res) => {
     if (!token) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
-    
+
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-    
-    const user = await prisma.user.findUnique({ 
+
+    const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
       include: { categories: true }
     });
-    
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     res.json({ user: excludePassword(user) });
   } catch (error) {
     res.status(401).json({ error: 'Invalid or expired token' });

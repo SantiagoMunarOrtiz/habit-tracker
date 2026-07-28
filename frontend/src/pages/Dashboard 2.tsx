@@ -11,7 +11,7 @@ export function Dashboard({ user }: { user: User }) {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [recommendation, setRecommendation] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   // Standardize "today" to local ISO string
   const todayDate = new Date();
   const today = new Date(todayDate.getTime() - (todayDate.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
@@ -33,7 +33,11 @@ export function Dashboard({ user }: { user: User }) {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await res.json();
-      setHabits(data);
+      if (res.ok && Array.isArray(data)) {
+        setHabits(data);
+      } else {
+        console.error('Failed to fetch habits:', data);
+      }
     } catch (error) {
       console.error('Error fetching habits:', error);
     }
@@ -80,23 +84,23 @@ export function Dashboard({ user }: { user: User }) {
     fetchRecommendation();
     fetchVacations();
     fetchGoals();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.id]);
 
   const handleCheckIn = async (habitId: string, status: string, checkInDate: string = today) => {
     try {
       const response = await fetch(`${API_URL}/habits/${habitId}/checkin`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ date: checkInDate, status })
       });
       const data = await response.json();
-      
+
       if (data.milestone === 'golden') {
-         alert('🌟 GOLDEN DAY! All mandatory habits completed!');
+        alert('🌟 GOLDEN DAY! All mandatory habits completed!');
       }
       if (data.unlockedAchievement) {
         alert(`🏆 Achievement Unlocked: ${data.unlockedAchievement.name}!\n${data.unlockedAchievement.message}`);
@@ -112,7 +116,7 @@ export function Dashboard({ user }: { user: User }) {
   const handleArchive = async (habitId: string) => {
     if (!confirm('Are you sure you want to delete this habit? Its historical data will be archived for your charts.')) return;
     try {
-      await fetch(`${API_URL}/habits/${habitId}/archive`, { 
+      await fetch(`${API_URL}/habits/${habitId}/archive`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
@@ -127,7 +131,7 @@ export function Dashboard({ user }: { user: User }) {
     try {
       await fetch(`${API_URL}/habits`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
@@ -177,14 +181,14 @@ export function Dashboard({ user }: { user: User }) {
           </div>
         </div>
       )}
-      
+
       <div className="space-y-8">
         {habits.length === 0 && (
           <div className="text-center p-8 text-gray-500 bg-[#1a1a1a] rounded-xl border border-dashed border-[#333]">
             No habits yet. Click "Add Task" to start!
           </div>
         )}
-        
+
         {['morning', 'afternoon', 'evening', 'any'].map(timeSlot => {
           const slotHabits = habits.filter(h => (h.timeOfDay || 'any') === timeSlot);
           if (slotHabits.length === 0) return null;
@@ -196,12 +200,12 @@ export function Dashboard({ user }: { user: User }) {
               <h3 className="text-sm font-bold text-gray-400 border-b border-[#333] pb-2 uppercase tracking-wider flex items-center gap-2">
                 {timeSlot === 'morning' ? '🌅' : timeSlot === 'afternoon' ? '☀️' : timeSlot === 'evening' ? '🌙' : '📌'} {slotTitle}
               </h3>
-              
+
               {slotHabits.map((habit) => {
                 const isCompletedToday = habit.logs?.some(log => log.date === today && log.status === 'completed');
-                
+
                 const currentDay = new Date();
-                const dayOfWeek = currentDay.getDay() === 0 ? 6 : currentDay.getDay() - 1; 
+                const dayOfWeek = currentDay.getDay() === 0 ? 6 : currentDay.getDay() - 1;
                 const startOfWeek = new Date(currentDay);
                 startOfWeek.setDate(currentDay.getDate() - dayOfWeek);
 
@@ -210,7 +214,7 @@ export function Dashboard({ user }: { user: User }) {
                   date.setDate(startOfWeek.getDate() + i);
                   const dateStr = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
                   const isCompleted = habit.logs?.some(l => l.date === dateStr && l.status === 'completed');
-                  
+
                   const selectedDays = habit.selectedDays ? JSON.parse(habit.selectedDays) : [];
                   const isMandatory = habit.scheduleType === 'daily' || (habit.scheduleType === 'fixedDays' && selectedDays.includes(i));
 
@@ -227,7 +231,7 @@ export function Dashboard({ user }: { user: User }) {
                   <div key={habit.id} className={`bg-[#1a1a1a] p-5 rounded-2xl border ${isCompletedToday ? 'border-green-900/50 bg-[#131b14]' : 'border-[#333]'} hover:border-gray-600 transition-colors`}>
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-start gap-4">
-                        <button 
+                        <button
                           onClick={() => handleCheckIn(habit.id, isCompletedToday ? 'skipped' : 'completed')}
                           disabled={isTodayVacation}
                           className={`w-7 h-7 mt-1 rounded-lg border-2 flex items-center justify-center transition-colors shrink-0
@@ -260,7 +264,7 @@ export function Dashboard({ user }: { user: User }) {
                         <div className="flex items-center gap-2 text-orange-500/80 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20">
                           <span className="font-bold text-sm">🔥 {habit.logs?.filter(l => l.status === 'completed').length || 0}</span>
                         </div>
-                        <button 
+                        <button
                           onClick={() => handleArchive(habit.id)}
                           className="text-gray-500 hover:text-red-500 p-1 rounded transition-colors"
                           title="Delete Habit"
@@ -269,20 +273,20 @@ export function Dashboard({ user }: { user: User }) {
                         </button>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between bg-[#111] rounded-xl p-3 border border-[#222]">
                       {weekDays.map((day, idx) => {
                         const dayIsVacation = isVacation(day.date);
                         return (
                           <div key={idx} className="flex flex-col items-center gap-1.5">
                             <span className={`text-[10px] font-bold ${day.isToday ? 'text-white' : 'text-gray-500'}`}>{day.label}</span>
-                            <button 
+                            <button
                               onClick={() => handleCheckIn(habit.id, day.isCompleted ? 'skipped' : 'completed', day.date)}
                               disabled={day.date !== today || dayIsVacation}
                               className={`w-6 h-6 rounded-full flex items-center justify-center border transition-all
                                 ${dayIsVacation ? 'border-[#333] bg-[#222] cursor-not-allowed' :
-                                  day.isCompleted ? 'bg-green-500 border-green-500 text-black' : 
-                                  day.isMandatory ? 'border-gray-600 bg-[#1a1a1a]' : 'border-[#333] bg-[#1a2333]'}
+                                  day.isCompleted ? 'bg-green-500 border-green-500 text-black' :
+                                    day.isMandatory ? 'border-gray-600 bg-[#1a1a1a]' : 'border-[#333] bg-[#1a2333]'}
                                 ${day.isToday && !day.isCompleted && !dayIsVacation ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-[#111]' : ''}
                               `}
                               title={dayIsVacation ? 'Vacation' : day.isMandatory ? 'Mandatory' : 'Rest Day'}
@@ -318,9 +322,9 @@ export function Dashboard({ user }: { user: User }) {
         })}
       </div>
 
-      <HabitFormModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <HabitFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onSubmit={handleCreateHabit}
         categories={user.categories}
         goals={goals}

@@ -43,6 +43,17 @@ app.use('/api/reflections', authenticateToken, reflectionRoutes);
 app.use('/api/work-planner', authenticateToken, workPlannerRoutes);
 app.use('/api/life-reviews', authenticateToken, lifeReviewRoutes);
 
+import { PrismaClient } from '@prisma/client';
+app.get('/api/debug', async (req, res) => {
+  try {
+    const prisma = new PrismaClient();
+    await prisma.$connect();
+    res.json({ status: 'Prisma is connected!', dbUrlConfigured: !!process.env.DATABASE_URL });
+  } catch (error: any) {
+    res.json({ status: 'Prisma failed', error: error.message || String(error), dbUrlConfigured: !!process.env.DATABASE_URL });
+  }
+});
+
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Unhandled Error:', err);

@@ -7,16 +7,16 @@ const router = express.Router();
 const prisma = new PrismaClient();
 
 router.post('/', async (req, res) => {
-  const { 
+  const {
     title, description, categoryId, userId,
     planType, difficulty, scheduleType, selectedDays, targetDaysPerWeek, restDays,
     timeOfDay, estimatedDuration, triggerCue, ifThenPlan, motivationPhrase, miniReward,
     goalId, goalTargetCount
   } = req.body;
-  
+
   try {
     const habit = await prisma.habit.create({
-      data: { 
+      data: {
         title, description, categoryId, userId,
         planType: planType || 'Personal',
         difficulty: difficulty || 'Medium',
@@ -44,13 +44,14 @@ router.get('/user/:userId', async (req, res) => {
       include: { category: true, logs: true },
     });
     res.json(habits);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch habits' });
+  } catch (error: any) {
+    console.error('Fetch habits error:', error);
+    res.status(500).json({ error: 'Failed to fetch habits', details: error.message || String(error) });
   }
 });
 
 router.put('/:id', async (req, res) => {
-  const { 
+  const {
     title, description, active,
     planType, difficulty, scheduleType, selectedDays, targetDaysPerWeek, restDays,
     timeOfDay, estimatedDuration, triggerCue, ifThenPlan, motivationPhrase, miniReward,
@@ -59,7 +60,7 @@ router.put('/:id', async (req, res) => {
   try {
     const habit = await prisma.habit.update({
       where: { id: req.params.id },
-      data: { 
+      data: {
         title, description, active,
         planType, difficulty, scheduleType,
         selectedDays: selectedDays ? JSON.stringify(selectedDays) : undefined,
@@ -89,7 +90,7 @@ router.get('/user/:userId/analytics', async (req, res) => {
 });
 
 router.post('/:id/checkin', async (req, res) => {
-  const { date, status, note } = req.body; 
+  const { date, status, note } = req.body;
   const habitId = req.params.id;
   try {
     const result = await checkInHabit(habitId, date, status, note);

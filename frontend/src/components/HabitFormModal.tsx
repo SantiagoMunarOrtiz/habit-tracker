@@ -25,14 +25,14 @@ export function HabitFormModal({ isOpen, onClose, onSubmit, categories, goals = 
     goalTargetCount: ''
   });
 
-  if (!isOpen) return null;
-
   // Sync initialGoalId when it changes and modal opens
   React.useEffect(() => {
     if (isOpen && initialGoalId) {
       setFormData(prev => ({ ...prev, goalId: initialGoalId }));
     }
   }, [isOpen, initialGoalId]);
+
+  if (!isOpen) return null;
 
   const toggleDay = (dayIndex: number) => {
     setFormData(prev => {

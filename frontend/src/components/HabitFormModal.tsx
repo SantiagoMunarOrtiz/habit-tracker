@@ -55,24 +55,25 @@ export function HabitFormModal({ isOpen, onClose, onSubmit, categories, goals = 
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
       <div className="bg-[#1a1a1a] border border-[#333] text-gray-200 rounded-2xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold mb-6 text-white">New Habit</h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium mb-2 text-gray-400">Habit Title</label>
-            <input required type="text" className="w-full bg-[#232323] border border-[#444] text-white rounded-lg p-3 focus:outline-none focus:border-green-500" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="e.g., Morning Workout" />
+            <input required type="text" className="w-full bg-[#232323] border border-[#444] text-white rounded-lg p-3 focus:outline-none focus:border-green-500" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} placeholder="e.g., Morning Workout" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-400">Plan Type</label>
-              <select className="w-full bg-[#232323] border border-[#444] text-white rounded-lg p-3" value={formData.planType} onChange={e => setFormData({...formData, planType: e.target.value})}>
+              <select className="w-full bg-[#232323] border border-[#444] text-white rounded-lg p-3" value={formData.planType} onChange={e => setFormData({ ...formData, planType: e.target.value })}>
                 <option value="Personal">Personal</option>
                 <option value="Work">Work</option>
                 <option value="Study">Study</option>
               </select>
+            </div>
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-400">Difficulty</label>
-              <select className="w-full bg-[#232323] border border-[#444] text-white rounded-lg p-3" value={formData.difficulty} onChange={e => setFormData({...formData, difficulty: e.target.value})}>
+              <select className="w-full bg-[#232323] border border-[#444] text-white rounded-lg p-3" value={formData.difficulty} onChange={e => setFormData({ ...formData, difficulty: e.target.value })}>
                 <option value="Easy">Easy</option>
                 <option value="Medium">Medium</option>
                 <option value="Hard">Hard</option>
@@ -83,7 +84,7 @@ export function HabitFormModal({ isOpen, onClose, onSubmit, categories, goals = 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-400">Link to Goal (Optional)</label>
-              <select className="w-full bg-[#232323] border border-[#444] text-white rounded-lg p-3" value={formData.goalId} onChange={e => setFormData({...formData, goalId: e.target.value})}>
+              <select className="w-full bg-[#232323] border border-[#444] text-white rounded-lg p-3" value={formData.goalId} onChange={e => setFormData({ ...formData, goalId: e.target.value })}>
                 <option value="">No Goal</option>
                 {goals.map(g => <option key={g.id} value={g.id}>{g.title}</option>)}
               </select>
@@ -91,13 +92,13 @@ export function HabitFormModal({ isOpen, onClose, onSubmit, categories, goals = 
             {formData.goalId && (
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-400">Target Completions</label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   min="1"
-                  className="w-full bg-[#232323] border border-[#444] text-white rounded-lg p-3 focus:outline-none focus:border-green-500" 
-                  value={formData.goalTargetCount} 
-                  onChange={e => setFormData({...formData, goalTargetCount: e.target.value})} 
-                  placeholder="e.g., 50" 
+                  className="w-full bg-[#232323] border border-[#444] text-white rounded-lg p-3 focus:outline-none focus:border-green-500"
+                  value={formData.goalTargetCount}
+                  onChange={e => setFormData({ ...formData, goalTargetCount: e.target.value })}
+                  placeholder="e.g., 50"
                 />
               </div>
             )}
@@ -122,15 +123,15 @@ export function HabitFormModal({ isOpen, onClose, onSubmit, categories, goals = 
 
           <div className="bg-[#1a1a2e] p-5 rounded-xl border border-[#2a2a4e]">
             <h3 className="font-semibold text-blue-300 mb-3">Science-Based Motivation</h3>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-blue-200/70 mb-2">If-Then Plan</label>
-              <input type="text" className="w-full bg-[#111] border border-[#2a2a4e] text-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500" value={formData.ifThenPlan} onChange={e => setFormData({...formData, ifThenPlan: e.target.value})} placeholder="If I miss my morning workout, I will do 15 mins of yoga at night." />
+              <input type="text" className="w-full bg-[#111] border border-[#2a2a4e] text-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500" value={formData.ifThenPlan} onChange={e => setFormData({ ...formData, ifThenPlan: e.target.value })} placeholder="If I miss my morning workout, I will do 15 mins of yoga at night." />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-blue-200/70 mb-2">Mini Reward</label>
-              <input type="text" className="w-full bg-[#111] border border-[#2a2a4e] text-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500" value={formData.miniReward} onChange={e => setFormData({...formData, miniReward: e.target.value})} placeholder="e.g., Watch one episode guilt-free" />
+              <input type="text" className="w-full bg-[#111] border border-[#2a2a4e] text-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500" value={formData.miniReward} onChange={e => setFormData({ ...formData, miniReward: e.target.value })} placeholder="e.g., Watch one episode guilt-free" />
             </div>
           </div>
 

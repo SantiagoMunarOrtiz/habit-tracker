@@ -7,15 +7,14 @@
     "backend"
   ],
   "scripts": {
-    "postinstall": "npm run install:all",
+    "postinstall": "cd backend && npx prisma generate",
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && npm run dev",
     "build": "npm run build:frontend && npm run build:backend",
     "build:frontend": "cd frontend && npm run build",
     "build:backend": "cd backend && npm run build",
-    "postbuild": "rm -rf dist && cp -r frontend/dist dist",
-    "install:all": "cd frontend && npm install && cd ../backend && npm install"
+    "postbuild": "rm -rf dist && cp -r frontend/dist dist"
   },
   "keywords": [],
   "author": "",

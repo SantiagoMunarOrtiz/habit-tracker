@@ -43,6 +43,16 @@ app.use('/api/reflections', authenticateToken, reflectionRoutes);
 app.use('/api/work-planner', authenticateToken, workPlannerRoutes);
 app.use('/api/life-reviews', authenticateToken, lifeReviewRoutes);
 
+// Global Error Handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Unhandled Error:', err);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: err.message || String(err),
+    stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
+  });
+});
+
 const PORT = process.env.PORT || 3001;
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
